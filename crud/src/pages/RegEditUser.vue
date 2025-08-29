@@ -1,90 +1,80 @@
 <template>
-  <v-toolbar :elevation="4" :title="user.id ? 'Editar usuario' : 'Registrar usuario'">
-    <v-toolbar-items>
-      <v-btn to="/">Lista de usuarios</v-btn>
-      <v-btn to="/register" @click="deleteCurrentUser">Registrar usuario</v-btn>
-    </v-toolbar-items>
-  </v-toolbar>
+    <!-- Barra superior con título dinámico según si se está editando o registrando -->
+    <v-toolbar :elevation="4" :title="(user && user.id) ? 'Editar usuario' : 'Registrar usuario'">
+        <v-toolbar-items>
+            <!-- Botón para volver a la lista de usuarios -->
+            <v-btn to="/">Lista de usuarios</v-btn>
+            <!-- Botón para limpiar el formulario y registrar un nuevo usuario -->
+            <v-btn to="/register" @click="deleteCurrentUser">Registrar usuario</v-btn>
+        </v-toolbar-items>
+    </v-toolbar>
 
-  <v-sheet :elevation="3" class="pa-3 ma-3" max-width="500">
-    <v-form ref="form" v-model="formValid" @submit.prevent="handleSubmit">
-      <v-text-field
-        v-model="user.name"
-        label="Nombre"
-        :rules="[requiredRule]"
-      />
-      <v-text-field
-        v-model="user.email"
-        label="Correo"
-        type="email"
-        :rules="[requiredRule, emailRule]"
-      />
-      <v-text-field
-        v-model="user.phone"
-        label="Teléfono"
-        type="tel"
-        :rules="[requiredRule, phoneRule]"
-      />
-      <v-btn type="submit" :disabled="!formValid">
-        {{ user.id ? 'Actualizar' : 'Registrar' }}
-      </v-btn>
-    </v-form>
-  </v-sheet>
+    <!-- Contenedor del formulario con estilo de hoja elevada -->
+    <v-sheet :elevation="3" :height="200" :width="200" border rounded class="pa-3 ma-3">
+        <!-- Formulario que previene el envío por defecto y ejecuta la acción correspondiente -->
+        <form @submit.prevent="user.id ? updateUser() : registerUser()">
+            <!-- Campo para el nombre del usuario -->
+            <v-text-field v-model="user.name" type="text" label="Nombre" />
+            <!-- Campo para el correo electrónico del usuario -->
+            <v-text-field v-model="user.email" type="email" label="Correo" />
+            <!-- Campo para el teléfono del usuario -->
+            <v-text-field v-model="user.phone" type="number" label="Telefono" />
+            <!-- Botón para enviar el formulario, cambia según si se edita o registra -->
+            <v-btn type="submit">{{ user.id ? 'Actualizar' : 'Registrar' }}</v-btn>
+        </form>
+    </v-sheet>
 </template>
 
+
 <script setup>
-import { ref, reactive } from 'vue';
+// Importa el store global de Vuex
 import { useStore } from 'vuex';
+// Importa el router para navegación entre páginas
 import { useRouter } from 'vue-router';
 
+// Inicializa el router y el store
 const router = useRouter();
 const store = useStore();
 
-const form = ref(null);
-const formValid = ref(false);
-
-// Datos del usuario (reactivos)
+// Obtiene el usuario actual desde el estado global
 const current = store.state.currentUser;
-const user = reactive({
-  id: current?.id || null,
-  name: current?.name || '',
-  email: current?.email || '',
-  phone: current?.phone || ''
-});
 
-// Reglas de validación
-const requiredRule = v => !!v || 'Este campo es obligatorio';
-const emailRule = v =>
-  /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) || 'Correo inválido';
-const phoneRule = v =>
-  /^\d{7,15}$/.test(v) || 'Teléfono inválido (solo dígitos, mínimo 7)';
-
-// Acción al enviar
-const handleSubmit = () => {
-  if (form.value.validate()) {
-    if (user.id) {
-      store.dispatch('editUser', { ...user });
-    } else {
-      store.dispatch('addUser', { ...user });
-    }
-    router.push('/');
-  }
+// Crea una copia local del usuario para edición o registro
+const user = {
+    id: current ? current.id : null,
+    name: current ? current.name : '',
+    email: current ? current.email : '',
+    phone: current ? current.phone : ''
 };
 
-// Limpiar usuario actual
+// Función para actualizar un usuario existente
+const updateUser = () => {
+    store.dispatch('editUser', user); // Envía los datos al store
+    router.push('/'); // Redirige a la lista de usuarios
+};
+
+// Función para registrar un nuevo usuario
+const registerUser = () => {
+    store.dispatch('addUser', user); // Agrega el usuario al store
+    router.push('/'); // Redirige a la lista de usuarios
+};
+
+// Limpia el usuario actual y reinicia el formulario
 const deleteCurrentUser = () => {
-  store.state.currentUser = null;
-  user.id = null;
-  user.name = '';
-  user.email = '';
-  user.phone = '';
+    store.state.currentUser = null; // Elimina el usuario del estado global
+    user.id = null;
+    user.name = '';
+    user.email = '';
+    user.phone = '';
 };
 </script>
 
+
 <style scoped>
+/* Estilo personalizado para el contenedor del formulario */
 .pa-3 {
-  padding: 12px !important;
-  height: auto !important;
-  width: 100% !important;
+    padding: 12px !important;
+    height: 50vh !important;
+    width: 50% !important;
 }
 </style>
