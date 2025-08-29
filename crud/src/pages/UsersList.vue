@@ -2,7 +2,7 @@
     <v-toolbar :elevation="4" title="Gestión de Usuarios">
         <v-toolbar-items>
             <v-btn to="/">Lista de usuarios</v-btn>
-            <v-btn to="/register">Registrar usuario</v-btn>
+            <v-btn to="/register" @click="store.state.currentUser = null">Registrar usuario</v-btn>
         </v-toolbar-items>
     </v-toolbar>
     <v-container fluid>

@@ -1,14 +1,14 @@
 <template>
-    <v-toolbar :elevation="4" title="Editar usuario">
+    <v-toolbar :elevation="4" :title="(user && user.id) ? 'Editar usuario' : 'Registrar usuario'">
         <v-toolbar-items>
             <v-btn to="/">Lista de usuarios</v-btn>
-            <v-btn to="/register">Registrar usuario</v-btn>
+            <v-btn to="/register" @click="deleteCurrentUser">Registrar usuario</v-btn>
         </v-toolbar-items>
     </v-toolbar>
     <v-sheet :elevation="3" :height="200" :width="200" border rounded class="pa-3 ma-3">
         <form @submit.prevent="user.id ? updateUser() : registerUser()">
             <v-text-field v-model="user.name" label="Nombre" />
-            <v-text-field v-model="user.email" label="Email" />
+            <v-text-field v-model="user.email" label="Correo" />
             <v-text-field v-model="user.phone" label="Telefono" />
             <v-btn type="submit">{{ user.id ? 'Actualizar' : 'Registrar' }}</v-btn>
         </form>
@@ -39,6 +39,14 @@
     const registerUser = () => {
         store.dispatch('addUser', user);
         router.push('/');
+    };
+
+    const deleteCurrentUser = () => {
+        store.state.currentUser = null;
+        user.id = null;
+        user.name = '';
+        user.email = '';
+        user.phone = '';
     };
 </script>
 

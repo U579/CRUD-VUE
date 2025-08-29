@@ -1,4 +1,5 @@
 import { createStore } from "vuex";
+import { v4 as uuidv4 } from 'uuid';
 
 export default createStore({
   state: {
@@ -26,6 +27,7 @@ export default createStore({
   },
   actions: {
     addUser({ commit }, user) {
+      user.id = uuidv4();
       commit("addUser", user);
     },
     editUser({ commit }, user) {
